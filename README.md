@@ -1,19 +1,20 @@
-# LinuxWineBridgeTest
+# Penguin Tweaks
 
-Proof of concept that a Geometry Dash mod running under Proton can call native Linux functions on the host.
+[Geode](https://geode-sdk.org/) mod for Geometry Dash on Linux (Proton/Wine).
 
-Wine isolates the Windows process from the host, so a mod can't directly use Linux APIs. This project works around that by bridging the two sides:
+- Auto-deafen in MegaHack
+- Native file dialogs instead of Wine ones
 
-- A Wine-native DLL `nativelib` loaded by the mod provides a thin RPC interface via a Unix socket
-- A native Rust process `rust-bridge` runs on the host side, receives commands over that socket, and executes them.
+Wine cuts off the Windows process from the host, so mods can't call Linux APIs directly. This mod bridges the gap:
 
-The mod itself is a [Geode](https://geode-sdk.org/) mod for Geometry Dash.
+- `nativelib` — a Wine-native DLL that exposes an RPC interface over a Unix socket
+- `rust-bridge` — a native Rust process on the host side that receives commands and calls the actual Linux APIs
 
 ## Architecture
 
 ```
-Geode mod under wine talks to NativeBridge.cpp -> then nativelib.dll (winegcc)
--> then Unix socket -> then rust-bridge (native) -> and then X11 / host APIs (for example)
+Geode mod (Wine) -> NativeBridge.cpp -> nativelib.dll (winegcc)
+  -> Unix socket -> rust-bridge (native) -> X11 / host APIs
 ```
 
 ## Build
@@ -33,13 +34,11 @@ make
 
 **rust-bridge** (requires Rust toolchain):
 ```sh
-cd rust-bridge
+cd src/rust-bridge
 make
 ```
 
-**...or you can use AIO native part build**
+**...or build the native parts all at once:**
 ```sh
 ./build-linux-native-part.sh
 ```
-
-# WIP

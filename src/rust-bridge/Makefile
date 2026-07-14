@@ -1,4 +1,4 @@
-DEST = ../resources
+DEST = ../../resources
 
 all:
 	cargo build --release

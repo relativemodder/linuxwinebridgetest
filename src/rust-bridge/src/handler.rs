@@ -1,7 +1,7 @@
 use crate::protocol::{Request, Response};
-use crate::x11;
+use crate::x11::XContext;
 
-pub fn handle_request(req: Request) -> Response {
+pub fn handle_request(req: Request, x11: &XContext) -> Response {
     match req.cmd.as_str() {
         "ping" => Response::ok(serde_json::json!("pong")),
 
@@ -22,13 +22,23 @@ pub fn handle_request(req: Request) -> Response {
             }
         }
 
-        "key_press" => {
+        "key_down" => {
             let keysym = match req.args.get("keysym").and_then(|v| v.as_str()) {
                 Some(k) => k.to_string(),
                 None => return Response::err("missing args.keysym"),
             };
+            match x11.key_down(&keysym) {
+                Ok(()) => Response::ok(serde_json::json!(null)),
+                Err(e) => Response::err(&e),
+            }
+        }
 
-            match x11::press_key(&keysym) {
+        "key_up" => {
+            let keysym = match req.args.get("keysym").and_then(|v| v.as_str()) {
+                Some(k) => k.to_string(),
+                None => return Response::err("missing args.keysym"),
+            };
+            match x11.key_up(&keysym) {
                 Ok(()) => Response::ok(serde_json::json!(null)),
                 Err(e) => Response::err(&e),
             }
